@@ -117,14 +117,22 @@ router.put("/update", upload.single("image"), async (req, res) => {
     res.status(500).json({ success: false, message: "Error updating data" });
   }
 });
-router.post("/delete", async (req, res) => {
+router.delete("/delete", async (req, res) => {
   try {
-    let id = req.id;
-    const result = await pool.query("DELETE FROM news WHERE id =($1)", [id]);
+    const id = req.query.id; 
+    console.log(`Deleting news item with ID: ${id}`); 
+
+    const result = await pool.query("DELETE FROM news WHERE id = $1", [id]);
+    
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: "News item not found." });
+    }
+
     res.status(200).json({ success: true });
   } catch (error) {
-    console.error("Error retrieving news:", error);
-    res.status(500).json({ success: false, message: "Failed to fetch news." });
+    console.error("Error deleting news:", error);
+    res.status(500).json({ success: false, message: "Failed to delete news." });
   }
 });
+
 module.exports = router;
